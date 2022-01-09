@@ -60,12 +60,12 @@ podTemplate(label: "build",
                                         sh "cp ${cloud_init_vm_prv_key} ./ssh-key.pem"
 //                                        sh "echo \"${cloud_init_vm_prv_key}\" | wc"
 //                                        sh "echo \"${cloud_init_vm_prv_key}\" >  ./ssh-key.pem"
-//                                        sh "chmod 0600 ./ssh-key.pem"
+                                        sh "chmod 0600 ./ssh-key.pem"
 
                                         sh "ls -l"
                                         sh "cat ./ssh-key.pem"
                                         sh "terraform plan -no-color ${varString}"
-                                        sh "terraform apply -auto-approve -no-color ${varString}"
+                                        sh "terraform apply -auto-approve  ${varString}"
 
 //                                        IP_ADDR = getOutput("gold-ami_ip | sed s/\\\"//g")
 //                                        INSTANCE_ID = getOutput("gold-ami_id")
@@ -137,12 +137,26 @@ podTemplate(label: "build",
                         when {
                             expression { 'true' == 'true' }
                         }
-                        steps {
-                            script {
-                                sh "terraform destroy -auto-approve"
+                        withCredentials([sshUserPrivateKey(credentialsId: 'cloud_init_vm_prv_key', keyFileVariable: 'cloud_init_vm_prv_key')]) {
+                            withCredentials([string(credentialsId: 'cloud_init_vm_pub_key', variable: 'cloud_init_vm_pub_key')]) {
+                                withCredentials([usernamePassword(credentialsId: 'proxmox_token', passwordVariable: 'PM_API_TOKEN_SECRET', usernameVariable: 'PM_API_TOKEN_ID')]) {
+                                    script {
+                                        def varMap = [:]
+                                        varMap["fullscap"] = fullscap
+                                        varMap["build_number"] = build_number
+                                        varMap["ssh_public_key"] = "'${cloud_init_vm_pub_key}'"
+
+                                        sh "terraform workspace new ${branch} || true"
+                                        sh "terraform workspace select ${branch}"
+
+                                        //def terraformStringBuilder
+                                        def varString = terraformVarStringBuilder(varMap)
+
+
+                                        sh "terraform refresh"
+                                        sh "terraform destroy -auto-approve  ${varString}"                                    }
+                                }
                             }
-                        }
-                    }
 //
 //                    stage('Snapshot the Instance') {
 //                        when {
@@ -158,28 +172,28 @@ podTemplate(label: "build",
 //                            }
 //                        }
 //                    }
+                        }
+                    }
                 }
             }
         }
-    }
-}
 
-def getOutput(tag) {
-    def retVal
-    retVal = sh(
-            script: "terraform output ${tag}",
-            returnStdout: true
-    ).trim()
+        def getOutput(tag) {
+            def retVal
+            retVal = sh(
+                    script: "terraform output ${tag}",
+                    returnStdout: true
+            ).trim()
 
-    return retVal
-}
+            return retVal
+        }
 
-def terraformVarStringBuilder(varMap) {
-    def varString = ""
-    for (def key in varMap.keySet()) {
-        println "key = ${key}, value = ${varMap[key]}"
-        varString += " -var ${key}=${varMap[key]}"
-    }
-    return varString
-}
+        def terraformVarStringBuilder(varMap) {
+            def varString = ""
+            for (def key in varMap.keySet()) {
+                println "key = ${key}, value = ${varMap[key]}"
+                varString += " -var ${key}=${varMap[key]}"
+            }
+            return varString
+        }
 
