@@ -55,7 +55,7 @@ podTemplate(label: "build",
                                         //def terraformStringBuilder
                                         def varString = terraformVarStringBuilder(varMap)
                                         sh "#!/bin/sh -e\necho '${cloud_init_vm_prv_key}' >  ./ssh-key.pem"
-                                        sh "chmod 0600 ${fileName}"
+                                        sh "chmod 0600 ./ssh-key.pem"
 
                                         sh "terraform plan -no-color ${varString}"
                                         sh "terraform apply -auto-approve -no-color ${varString}"
