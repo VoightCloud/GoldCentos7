@@ -2,10 +2,10 @@
   name: required_software
   version: main
   scm: git
-#- src: git+https://github.com/M-A/scapscan.git
-#  name: scapscan
-#  version: main
-#  scm: git
+- src: git+https://github.com/VoightCloud/CentosSCAPScan.git
+  name: scapscan
+  version: main
+  scm: git
 #- src: git+https://github..com/M-A/register_agents.git
 #  name: register_agents
 #  version: main
