@@ -72,7 +72,7 @@ podTemplate(label: "build",
                                 def pemJSON = getPEMjson(cloud_init_vm_prv_key, "aws_certificate", "pem.json")
 
                                 def ansibleVarMap = [:]
-                                localDeploy(cloud_init_vm_prv_key, "./playbook.yaml", ansibleVarMap, pemJSON, IP_ADDR)
+                                localDeploy("./playbook.yaml", ansibleVarMap, pemJSON, IP_ADDR)
 
                                 sh "terraform destroy -auto-approve"
 
@@ -203,7 +203,7 @@ def terraformVarStringBuilder(varMap) {
     return varString
 }
 
-def localDeploy(playbook, varMap, IP_ADDR){
+def localDeploy(playbook, varMap, varFileName, IP_ADDR){
     // Make backup before sed command
 
 //    sh "cp ./roles/requirements.yml ./roles/requirements.yml.bak"
