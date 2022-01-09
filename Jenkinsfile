@@ -20,7 +20,7 @@ def liteReportName
 
 podTemplate(label: "build",
         containers: [containerTemplate(name: 'packer-terraform',
-                image: 'voight/packer-terraform:1.1',
+                image: 'voight/packer-terraform:1.2',
                 alwaysPullImage: false,
                 ttyEnabled: true,
                 privileged: true,
@@ -64,12 +64,15 @@ podTemplate(label: "build",
                                         sh "terraform plan -no-color ${varString}"
                                         sh "terraform apply -auto-approve  ${varString}"
 
-//                                        IP_ADDR = getOutput("gold-ami_ip | sed s/\\\"//g")
+                                        IP_ADDR = getOutput("gold-ami_ip | sed s/\\\"//g")
 //                                        INSTANCE_ID = getOutput("gold-ami_id")
 //                                        BASE_AMI = getOutput("base_ami")
                                     }
                                 }
-                                sh "ansible-playbook ./playbook.yaml"
+                                def pemJSON = getPEMjson(cloud_init_vm_prv_key, "aws_certificate", "pem.json")
+
+                                def ansibleVarMap = [:]
+                                localDeploy(aws_certificate, playbook, ansibleVarMap, varFile, IP_ADDR)
 
                                 sh "terraform destroy -auto-approve"
 
@@ -199,4 +202,72 @@ def terraformVarStringBuilder(varMap) {
     }
     return varString
 }
+
+def localDeploy(playbook, varMap, IP_ADDR){
+    // Make backup before sed command
+
+//    sh "cp ./roles/requirements.yml ./roles/requirements.yml.bak"
+//    // SED to add git token to requirements
+//    sedCommand = "sed -i 's|https://github|https://${gitToken}@github|g' ./roles/requirements.yml"
+//    sedResult = sh(returnStdout: true, script: "${sedCommand}")
+
+    sedCommand = "sed -i 's/IP_ADDR/${IP_ADDR}/g' hosts.yaml"
+    sedResult = sh(returnStdout: true, script: "${sedCommand}")
+
+    // Generate ansible vars extra parameters
+    if(varFileName != null) {
+        varsString = ansibleVarStringBuilder(varMap, varFileName)
+    } else {
+        varsString = ansibleVarStringBuilder(varMap)
+    }
+
+    // Pull down dependencies
+    sh "ansible-galaxy install -r ./roles/requirements.yml -p roles/"
+
+    // Call Ansible-playbook
+    sh "ansible-playbook ${varsString} ${playbook}"
+
+    // Remove requirements with embedded git token
+    sh "rm ./roles/requirements.yml"
+
+    sh "rm ./ssh-key.pem"
+
+    // Move backup file back in case somebody needs to troubleshoot the workspace
+    sh "mv ./roles/requirements.yml.bak ./roles/requirements.yml"
+}
+
+//def localDeploy(gitToken, aws_certificate, playbook, varMap, varFileName, repo_url, repo_branch, IP_ADDR, INSTANCE_ENVIRONMENT_TAG){
+//    // Clone repo + branch
+//    dir("repo"){
+//        // Inject token into git repo
+//        authRepo = sh(returnStdout: true, script: "sh -c \"echo -n ${repo_url} | sed 's|https://github|https://${gitToken}@github|g'\"")
+//
+//        // Clone the repo
+//        sh "git clone -b ${repo_branch} ${authRepo} ."
+//
+//        // Call the deployment
+//        localDeploy(gitToken, aws_certificate, playbook, varMap, varFileName, IP_ADDR, INSTANCE_ENVIRONMENT_TAG)
+//    }
+//}
+
+def ansibleVarStringBuilder(varMap, varFileName){
+    return ansibleVarStringBuilder(varMap) + " -e ${varFileName}"
+}
+
+def ansibleVarStringBuilder(varMap){
+    def varString = ""
+    for (def key in varMap.keySet()) {
+        println "key = ${key}, value = ${varMap[key]}"
+        varString += " -e ${key}=\"${varMap[key]}\""
+    }
+    return varString
+}
+
+def getPEMjson(certString, certName, fileName){
+    pemJSON = "{\"${certName}\":\"${certString}\"}"
+    sh "#!/bin/sh -e\necho '${pemJSON}' > ${fileName}"
+    sh "chmod 0600 ${fileName}"
+    return "${fileName}"
+}
+
 
