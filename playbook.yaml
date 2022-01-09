@@ -1,0 +1,11 @@
+- name: Configure Gold Image node
+  hosts: all
+  gather_facts: false
+
+  vars_files:
+  - vars/roles.yml
+
+  roles:
+  - required_software
+  - register_agents
+  - aide_update
