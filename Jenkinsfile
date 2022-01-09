@@ -39,6 +39,7 @@ podTemplate(label: "build",
                                                         branches         : scm.branches,
                                                         extensions       : scm.extensions])
 
+                                environment
 //                            try {
                                 dir('template-ec2') {
                                     script {
@@ -56,7 +57,7 @@ podTemplate(label: "build",
 
                                         //def terraformStringBuilder
                                         def varString = terraformVarStringBuilder(varMap)
-                                        sh "#!/bin/sh -e\necho '${cloud_init_vm_prv_key}' >  ./ssh-key.pem"
+                                        sh '#!/bin/sh -e\necho \'${cloud_init_vm_prv_key}\' >  ./ssh-key.pem'
                                         sh "chmod 0600 ./ssh-key.pem"
 
                                         sh "terraform plan -no-color ${varString}"
