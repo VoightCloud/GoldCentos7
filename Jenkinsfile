@@ -61,8 +61,8 @@ podTemplate(label: "build",
 
                                             sh "chmod 0600 ./ssh-key.pem"
 
-                                            sh "terraform plan -no-color ${varString}"
-                                            sh "terraform apply -auto-approve  ${varString}"
+                                            //sh "terraform plan -no-color ${varString}"
+                                            sh "TF_IN_AUTOMATION='1' terraform apply -auto-approve  ${varString}"
 
                                             IP_ADDR = getOutput("ip | sed s/\\\"//g")
 //                                        INSTANCE_ID = getOutput("gold-ami_id")
@@ -77,7 +77,7 @@ podTemplate(label: "build",
                                     sh "scp -i ./ssh-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ec2-admin@${IP_ADDR}:/tmp/*.html ."
 
 
-//                                    sh "terraform destroy -auto-approve"
+                                    sh "terraform destroy -auto-approve"
 
                                     sh "rm -f ./ssh-key.pem"
 
@@ -87,7 +87,7 @@ podTemplate(label: "build",
                                 finally {
                                     dir('template-ec2') {
                                         script {
-//                                            sh "terraform destroy -auto-approve"
+                                            sh "terraform destroy -auto-approve"
                                             sh "rm -f ./ssh-key.pem"
                                         }
                                     }
