@@ -30,6 +30,7 @@ podTemplate(label: "build",
         ansiColor('xterm') {
             stage('Build') {
                 withCredentials([sshUserPrivateKey(credentialsId: 'cloud_init_vm_prv_key', keyFileVariable: 'cloud_init_vm_prv_key')]) {
+                    withCredentials([sshUserPrivateKey(credentialsId: 'cloud_init_vm_pub_key', keyFileVariable: 'cloud_init_vm_pub_key')]) {
                     withCredentials([usernamePassword(credentialsId: 'proxmox_token', passwordVariable: 'packer_token', usernameVariable: 'packer_username')]) {
 
                         container('packer-terraform') {
@@ -45,6 +46,7 @@ podTemplate(label: "build",
                                         def varMap = [:]
                                         varMap["fullscap"] = fullscap
                                         varMap["build_number"] = build_number
+                                        varMap["ssh_public_key" = cloud_init_vm_pub_key]
 
                                         sh "terraform --version"
                                         sh "terraform init"
