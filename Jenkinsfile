@@ -81,7 +81,7 @@ podTemplate(label: "build",
                                     sh "curl -k -s -X POST https://192.168.137.7:8006/api2/json/nodes/ugli/qemu/$INSTANCE_ID/status/shutdown -H 'Authorization: PVEAPIToken=$packer_username=$packer_token'"
 
                                     // Snapshot the virtual machine
-                                    sh "curl -k -s -X POST https://192.168.137.7:8006/api2/json/nodes/ugli/qemu/109/snapshot/TheSnapshot" -H 'Authorization: PVEAPIToken=$packer_username=$packer_token'"
+                                    sh "curl -k -s -X POST https://192.168.137.7:8006/api2/json/nodes/ugli/qemu/109/snapshot/TheSnapshot -H 'Authorization: PVEAPIToken=$packer_username=$packer_token'"
 
                                     // Destroy the old machine
                                     sh "terraform destroy -auto-approve"
