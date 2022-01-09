@@ -65,7 +65,7 @@ podTemplate(label: "build",
                                             sh "TF_IN_AUTOMATION='1' terraform apply -auto-approve  ${varString}"
 
                                             IP_ADDR = getOutput("ip | sed s/\\\"//g")
-//                                        INSTANCE_ID = getOutput("gold-ami_id")
+                                            INSTANCE_ID = getOutput("vm_id")
 //                                        BASE_AMI = getOutput("base_ami")
                                         }
                                     }
@@ -77,6 +77,13 @@ podTemplate(label: "build",
                                     sh "scp -i ./ssh-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ec2-admin@${IP_ADDR}:/tmp/*.html ."
 
 
+                                    // Halt the virtual machine
+                                    sh "curl -k -s -X POST https://192.168.137.7:8006/api2/json/nodes/ugli/qemu/$INSTANCE_ID/status/shutdown -H 'Authorization: PVEAPIToken=$packer_username=$packer_token'"
+
+                                    // Snapshot the virtual machine
+                                    sh "curl -k -s -X POST https://192.168.137.7:8006/api2/json/nodes/ugli/qemu/109/snapshot/TheSnapshot" -H 'Authorization: PVEAPIToken=$packer_username=$packer_token'"
+
+                                    // Destroy the old machine
                                     sh "terraform destroy -auto-approve"
 
                                     sh "rm -f ./ssh-key.pem"
