@@ -21,9 +21,9 @@ resource "proxmox_vm_qemu" "test_server" {
   #count.index starts at 0, so + 1 means this VM will be named test-vm-1 in proxmox
   # this now reaches out to the vars file. I could've also used this var above in the pm_api_url setting but wanted to spell it out up there. target_node is different than api_url. target_node is which node hosts the template and thus also which node will host the new VM. it can be different than the host you use to communicate with the API. the variable contains the contents "prox-1u"
   target_node = var.proxmox_host
-  # another variable with contents "ubuntu-2004-cloudinit-template"
   clone       = var.template_name
   full_clone  = false
+
   # basic VM settings here. agent refers to guest agent
   agent       = 1
   bios        = "ovmf"
@@ -32,6 +32,7 @@ resource "proxmox_vm_qemu" "test_server" {
   sockets     = 1
   cpu         = "host"
   memory      = 2048
+
   scsihw      = "virtio-scsi-single"
   bootdisk    = "scsi0"
   disk {
@@ -48,6 +49,7 @@ resource "proxmox_vm_qemu" "test_server" {
     model  = "virtio"
     bridge = "vmbr0"
   }
+
   # not sure exactly what this is for. presumably something about MAC addresses and ignore network changes during the life of the VM
   lifecycle {
     ignore_changes = [
@@ -76,10 +78,10 @@ data "template_file" "user_data" {
   count    = 1
   template = file("${path.module}/userdata.tmpl")
   vars     = {
-    pubkey   =  var.ssh_public_key # file("~/.ssh/id_rsa.pub")
     hostname = "vm-${count.index}"
-    fqdn     = "vm-${count.index}.voight.org"
     dna      = var.template_name
+    #    pubkey   =  var.ssh_public_key # file("~/.ssh/id_rsa.pub")
+    #    fqdn     = "vm-${count.index}.voight.org"
   }
 }
 
