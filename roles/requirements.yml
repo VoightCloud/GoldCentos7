@@ -1,8 +1,8 @@
-- src: git+https://github.com/VoightCloud/GoldCent7Required.git
+- src: git+https://github.com/VoightCloud/Centos7Required.git
   name: required_software
   version: main
   scm: git
-- src: git+https://github.com/VoightCloud/CentosSCAPScan.git
+- src: git+https://github.com/VoightCloud/Centos7SCAPScan.git
   name: scapscan
   version: main
   scm: git
@@ -10,6 +10,7 @@
 #  name: register_agents
 #  version: main
 #  scm: git
-#- src: git+https://github.com/M-A/aide-update.git
-#  name: aide_update
-#  version: master
+- src: git+https://github.com/VoightCloud/Centos7AideUpdate.git
+  name: aide_update
+  version: main
+  scm: git
