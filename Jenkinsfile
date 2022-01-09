@@ -77,7 +77,7 @@ podTemplate(label: "build",
                                     sh "scp -i ./ssh-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ec2-admin@${IP_ADDR}:/tmp/*.html ."
 
 
-                                    sh "terraform destroy -auto-approve"
+//                                    sh "terraform destroy -auto-approve"
 
                                     sh "rm -f ./ssh-key.pem"
 
@@ -87,7 +87,7 @@ podTemplate(label: "build",
                                 finally {
                                     dir('template-ec2') {
                                         script {
-                                            sh "terraform destroy -auto-approve"
+//                                            sh "terraform destroy -auto-approve"
                                             sh "rm -f ./ssh-key.pem"
                                         }
                                     }
