@@ -29,7 +29,7 @@ podTemplate(label: "build",
     node('build') {
         ansiColor('xterm') {
             stage('Build') {
-                withCredentials([sshUserPrivateKey(credentialsId: cloudinitvmprvkey, keyFileVariable: 'cloud_init_vm_prv_key')]) {
+                withCredentials([sshUserPrivateKey(credentialsId: cloud_init_vm_prv_key, keyFileVariable: 'cloud_init_vm_prv_key')]) {
                     withCredentials([usernamePassword(credentialsId: 'proxmox_token', passwordVariable: 'packer_token', usernameVariable: 'packer_username')]) {
 
                         container('packer-terraform') {
@@ -54,7 +54,7 @@ podTemplate(label: "build",
 
                                         //def terraformStringBuilder
                                         def varString = terraformVarStringBuilder(varMap)
-                                        sh "#!/bin/sh -e\necho '${cloudinitvmprvkey}' >  ./ssh-key.pem"
+                                        sh "#!/bin/sh -e\necho '${cloud_init_vm_prv_key}' >  ./ssh-key.pem"
                                         sh "chmod 0600 ${fileName}"
 
                                         sh "terraform plan -no-color ${varString}"
