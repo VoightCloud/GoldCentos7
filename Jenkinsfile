@@ -62,15 +62,13 @@ podTemplate(label: "build",
 //                                        sh "echo \"${cloud_init_vm_prv_key}\" >  ./ssh-key.pem"
                                         sh "chmod 0600 ./ssh-key.pem"
 
-                                        sh "ls -l"
-                                        sh "cat ./ssh-key.pem"
                                         sh "terraform plan -no-color ${varString}"
                                         sh "terraform apply -auto-approve  ${varString}"
 
 //                                        IP_ADDR = getOutput("gold-ami_ip | sed s/\\\"//g")
 //                                        INSTANCE_ID = getOutput("gold-ami_id")
 //                                        BASE_AMI = getOutput("base_ami")
-                                        sh "terraform destroy -auto-approve ${varString}"
+                                        sh "terraform destroy -auto-approve"
 
                                         sh "rm -f ./ssh-key"
 //                                sh "curl -k -s -X DELETE https://192.168.137.7:8006/api2/json/nodes/ugli/storage/local/content/local:iso/${ksisoname} -H 'Authorization: PVEAPIToken=$packer_username=$packer_token'"
@@ -133,32 +131,32 @@ podTemplate(label: "build",
 //                        }
 //                    }
 //
-                    stage('Shutdown the Instance') {
-                        when {
-                            expression { 'true' == 'true' }
-                        }
-                        withCredentials([sshUserPrivateKey(credentialsId: 'cloud_init_vm_prv_key', keyFileVariable: 'cloud_init_vm_prv_key')]) {
-                            withCredentials([string(credentialsId: 'cloud_init_vm_pub_key', variable: 'cloud_init_vm_pub_key')]) {
-                                withCredentials([usernamePassword(credentialsId: 'proxmox_token', passwordVariable: 'PM_API_TOKEN_SECRET', usernameVariable: 'PM_API_TOKEN_ID')]) {
-                                    script {
-                                        def varMap = [:]
-                                        varMap["fullscap"] = fullscap
-                                        varMap["build_number"] = build_number
-                                        varMap["ssh_public_key"] = "'${cloud_init_vm_pub_key}'"
-
-                                        sh "terraform workspace new ${branch} || true"
-                                        sh "terraform workspace select ${branch}"
-
-                                        //def terraformStringBuilder
-                                        def varString = terraformVarStringBuilder(varMap)
-
-
-                                        sh "terraform refresh"
-                                        sh "terraform destroy -auto-approve  ${varString}"
-                                    }
-                                }
-                            }
-                        }
+//                    stage('Shutdown the Instance') {
+//                        when {
+//                            expression { 'true' == 'true' }
+//                        }
+//                        withCredentials([sshUserPrivateKey(credentialsId: 'cloud_init_vm_prv_key', keyFileVariable: 'cloud_init_vm_prv_key')]) {
+//                            withCredentials([string(credentialsId: 'cloud_init_vm_pub_key', variable: 'cloud_init_vm_pub_key')]) {
+//                                withCredentials([usernamePassword(credentialsId: 'proxmox_token', passwordVariable: 'PM_API_TOKEN_SECRET', usernameVariable: 'PM_API_TOKEN_ID')]) {
+//                                    script {
+//                                        def varMap = [:]
+//                                        varMap["fullscap"] = fullscap
+//                                        varMap["build_number"] = build_number
+//                                        varMap["ssh_public_key"] = "'${cloud_init_vm_pub_key}'"
+//
+//                                        sh "terraform workspace new ${branch} || true"
+//                                        sh "terraform workspace select ${branch}"
+//
+//                                        //def terraformStringBuilder
+//                                        def varString = terraformVarStringBuilder(varMap)
+//
+//
+//                                        sh "terraform refresh"
+//                                        sh "terraform destroy -auto-approve  ${varString}"
+//                                    }
+//                                }
+//                            }
+//                        }
 //
 //                    stage('Snapshot the Instance') {
 //                        when {
