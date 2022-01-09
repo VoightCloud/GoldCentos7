@@ -20,7 +20,7 @@ def liteReportName
 
 podTemplate(label: "build",
         containers: [containerTemplate(name: 'packer-terraform',
-                image: 'voight/packer-terraform:1.3',
+                image: 'voight/packer-terraform:1.4',
                 alwaysPullImage: false,
                 ttyEnabled: true,
                 privileged: true,
