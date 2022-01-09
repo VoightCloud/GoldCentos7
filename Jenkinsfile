@@ -70,7 +70,7 @@ podTemplate(label: "build",
 //                                        IP_ADDR = getOutput("gold-ami_ip | sed s/\\\"//g")
 //                                        INSTANCE_ID = getOutput("gold-ami_id")
 //                                        BASE_AMI = getOutput("base_ami")
-                                        sh "terraform destroy -auto-approve"
+                                        sh "terraform destroy -auto-approve ${varString}"
 
                                         sh "rm -f ./ssh-key"
 //                                sh "curl -k -s -X DELETE https://192.168.137.7:8006/api2/json/nodes/ugli/storage/local/content/local:iso/${ksisoname} -H 'Authorization: PVEAPIToken=$packer_username=$packer_token'"
