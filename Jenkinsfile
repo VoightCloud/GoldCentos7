@@ -126,16 +126,16 @@ podTemplate(label: "build",
 //                        }
 //                    }
 //
-//                    stage('Shutdown the Instance') {
-//                        when {
-//                            expression { 'true' == 'true' }
-//                        }
-//                        steps {
-//                            script {
-//                                terraform.stopInstance(INSTANCE_ID)
-//                            }
-//                        }
-//                    }
+                    stage('Shutdown the Instance') {
+                        when {
+                            expression { 'true' == 'true' }
+                        }
+                        steps {
+                            script {
+                                sh "terraform destroy -auto-approve"
+                            }
+                        }
+                    }
 //
 //                    stage('Snapshot the Instance') {
 //                        when {

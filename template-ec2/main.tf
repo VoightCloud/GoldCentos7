@@ -96,7 +96,7 @@ resource "null_resource" "cloud_init_config_files" {
     type        = "ssh"
     user        = "ec2-admin"
     host        = "192.168.137.20${count.index + 1}"
-    private_key = var.ssh_public_key #file("./ssh-key.pem")
+    private_key = file("./ssh-key.pem")
   }
 
   provisioner "file" {
