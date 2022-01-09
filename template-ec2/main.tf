@@ -62,9 +62,9 @@ resource "proxmox_vm_qemu" "test_server" {
   ipconfig0 = "ip=192.168.137.20${count.index + 1}/24,gw=192.168.137.1"
 
   # sshkeys set using variables. the variable contains the text of the key.
-#  sshkeys = <<EOF
-#  ${var.ssh_key}
-#  EOF
+  sshkeys = <<EOF
+  ${var.ssh_public_key}
+  EOF
 }
 
 locals {
