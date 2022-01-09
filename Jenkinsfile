@@ -57,7 +57,7 @@ podTemplate(label: "build",
                                         //def terraformStringBuilder
                                         def varString = terraformVarStringBuilder(varMap)
 
-                                        sh "echo \"${cloud_init_vm_prv_key}\" | wc -l"
+                                        sh "echo \"${cloud_init_vm_prv_key}\" | wc"
                                         sh "echo \"${cloud_init_vm_prv_key}\" >  ./ssh-key.pem"
                                         sh "chmod 0600 ./ssh-key.pem"
 
