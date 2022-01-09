@@ -58,8 +58,7 @@ podTemplate(label: "build",
                                         def varString = terraformVarStringBuilder(varMap)
 
                                         sh "cp ${cloud_init_vm_prv_key} ./ssh-key.pem"
-//                                        sh "echo \"${cloud_init_vm_prv_key}\" | wc"
-//                                        sh "echo \"${cloud_init_vm_prv_key}\" >  ./ssh-key.pem"
+
                                         sh "chmod 0600 ./ssh-key.pem"
 
                                         sh "terraform plan -no-color ${varString}"
@@ -68,21 +67,26 @@ podTemplate(label: "build",
 //                                        IP_ADDR = getOutput("gold-ami_ip | sed s/\\\"//g")
 //                                        INSTANCE_ID = getOutput("gold-ami_id")
 //                                        BASE_AMI = getOutput("base_ami")
-                                        sh "terraform destroy -auto-approve"
-
-                                        sh "rm -f ./ssh-key"
-//                                sh "curl -k -s -X DELETE https://192.168.137.7:8006/api2/json/nodes/ugli/storage/local/content/local:iso/${ksisoname} -H 'Authorization: PVEAPIToken=$packer_username=$packer_token'"
                                     }
+                                }
+                                sh "ansible-playbook ./playbook.yaml"
+
+                                sh "terraform destroy -auto-approve"
+
+                                sh "rm -f ./ssh-key"
+
+//                                sh "curl -k -s -X DELETE https://192.168.137.7:8006/api2/json/nodes/ugli/storage/local/content/local:iso/${ksisoname} -H 'Authorization: PVEAPIToken=$packer_username=$packer_token'"
+                            }
 //                            } finally {
 //                                // Delete the temporary VM
 //                                // This is probably at the end and handled after template snapshot.
 //                                sh "curl -k -s -X DELETE https://192.168.137.7:8006/api2/json/nodes/ugli/storage/local/content/local:iso/${ksisoname} -H 'Authorization: PVEAPIToken=$packer_username=$packer_token'"
 //                            }
-                                }
-//                            }
-                            }
                         }
+//                            }
                     }
+                }
+            }
 //                    stage('Provision with Ansible Tower') {
 //                        when {
 //                            expression { 'true' == 'true' }
@@ -172,11 +176,10 @@ podTemplate(label: "build",
 //                            }
 //                        }
 //                    }
-                }
-            }
         }
     }
 }
+
 
 def getOutput(tag) {
     def retVal
