@@ -1,5 +1,5 @@
 output "ip" {
-  value = proxmox_vm_qemu.test_server.ipconfig0
+  value = "192.168.137.201"
 }
 #
 #output "hostname" {

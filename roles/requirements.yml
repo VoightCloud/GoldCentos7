@@ -1,4 +1,4 @@
-- src: git+https://github..com/M-A/required_software.git
+- src: git+https://github.com/VoightCloud/GoldCent7Required.git
   name: required_software
   version: main
   scm: git
