@@ -28,7 +28,8 @@ variable "build_number" {
 }
 
 variable "ssh_public_key" {
-  description = "The SSH to use to connect to the system."
+  description = "The SSH key to put to to the system so cloud user can log in."
+  default = ""
 }
 
 variable "fullscap" {

@@ -1,6 +1,6 @@
-#output "ip" {
-#  value =
-#}
+output "ip" {
+  value = "192.168.137.201"
+}
 #
 #output "hostname" {
 #  value = local.hostname

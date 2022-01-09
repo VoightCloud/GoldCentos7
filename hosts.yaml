@@ -1,0 +1,9 @@
+all:
+  hosts:
+    IP_ADDR
+
+  vars:
+    ansible_ssh_user: ec2-admin
+    ansible_ssh_private_key_file: ssh-key.pem
+    tags:
+      PLATFORM: Gold Centos 7

@@ -20,7 +20,7 @@ def liteReportName
 
 podTemplate(label: "build",
         containers: [containerTemplate(name: 'packer-terraform',
-                image: 'voight/packer-terraform:1.1',
+                image: 'voight/packer-terraform:1.4',
                 alwaysPullImage: false,
                 ttyEnabled: true,
                 privileged: true,
@@ -29,52 +29,75 @@ podTemplate(label: "build",
     node('build') {
         ansiColor('xterm') {
             stage('Build') {
-                withCredentials([sshUserPrivateKey(credentialsId: cloud_init_vm_prv_key, keyFileVariable: 'cloud_init_vm_prv_key')]) {
-                    withCredentials([usernamePassword(credentialsId: 'proxmox_token', passwordVariable: 'packer_token', usernameVariable: 'packer_username')]) {
+                withCredentials([sshUserPrivateKey(credentialsId: 'cloud_init_vm_prv_key', keyFileVariable: 'cloud_init_vm_prv_key')]) {
+                    withCredentials([string(credentialsId: 'cloud_init_vm_pub_key', variable: 'cloud_init_vm_pub_key')]) {
+                        withCredentials([usernamePassword(credentialsId: 'proxmox_token', passwordVariable: 'PM_API_TOKEN_SECRET', usernameVariable: 'PM_API_TOKEN_ID')]) {
 
-                        container('packer-terraform') {
-                            def scmVars = checkout([$class           : 'GitSCM',
-                                                    userRemoteConfigs: scm.userRemoteConfigs,
-                                                    branches         : scm.branches,
-                                                    extensions       : scm.extensions])
+                            container('packer-terraform') {
+                                def scmVars = checkout([$class           : 'GitSCM',
+                                                        userRemoteConfigs: scm.userRemoteConfigs,
+                                                        branches         : scm.branches,
+                                                        extensions       : scm.extensions])
 
-//                            try {
-                                dir('template-ec2') {
-                                    script {
-                                        echo "Build the Environment"
-                                        def varMap = [:]
-                                        varMap["fullscap"] = fullscap
-                                        varMap["build_number"] = build_number
+                                try {
+                                    dir('template-ec2') {
+                                        script {
+                                            echo "Build the Environment"
+                                            def varMap = [:]
+                                            varMap["fullscap"] = fullscap
+                                            varMap["build_number"] = build_number
+                                            varMap["ssh_public_key"] = "'${cloud_init_vm_pub_key}'"
 
-                                        sh "terraform --version"
-                                        sh "terraform init"
+                                            sh "terraform --version"
+                                            sh "terraform init"
 
-                                        sh "terraform workspace new ${branch} || true"
-                                        sh "terraform workspace select ${branch}"
+                                            sh "terraform workspace new ${branch} || true"
+                                            sh "terraform workspace select ${branch}"
 
-                                        //def terraformStringBuilder
-                                        def varString = terraformVarStringBuilder(varMap)
-                                        sh "#!/bin/sh -e\necho '${cloud_init_vm_prv_key}' >  ./ssh-key.pem"
-                                        sh "chmod 0600 ${fileName}"
+                                            //def terraformStringBuilder
+                                            def varString = terraformVarStringBuilder(varMap)
 
-                                        sh "terraform plan -no-color ${varString}"
-                                        sh "terraform apply -auto-approve -no-color ${varString}"
+                                            sh "cp ${cloud_init_vm_prv_key} ./ssh-key.pem"
 
-//                                        IP_ADDR = getOutput("gold-ami_ip | sed s/\\\"//g")
+                                            sh "chmod 0600 ./ssh-key.pem"
+
+                                            sh "terraform plan -no-color ${varString}"
+                                            sh "terraform apply -auto-approve  ${varString}"
+
+                                            IP_ADDR = getOutput("ip | sed s/\\\"//g")
 //                                        INSTANCE_ID = getOutput("gold-ami_id")
 //                                        BASE_AMI = getOutput("base_ami")
-                                        sh "rm -f ./ssh-key"
-//                                sh "curl -k -s -X DELETE https://192.168.137.7:8006/api2/json/nodes/ugli/storage/local/content/local:iso/${ksisoname} -H 'Authorization: PVEAPIToken=$packer_username=$packer_token'"
+                                        }
                                     }
-//                            } finally {
-//                                // Delete the temporary VM
-//                                // This is probably at the end and handled after template snapshot.
+                                    def pemJSON = getPEMjson(cloud_init_vm_prv_key, "aws_certificate", "pem.json")
+                                    sh "cp ${cloud_init_vm_prv_key} ./ssh-key.pem"
+
+                                    def ansibleVarMap = [:]
+                                    localDeploy("./playbook.yaml", ansibleVarMap, pemJSON, IP_ADDR)
+
+                                    sh "terraform destroy -auto-approve"
+
+                                    sh "rm -f ./ssh-key.pem"
+
+//                                sh "curl -k -s -X DELETE https://192.168.137.7:8006/api2/json/nodes/ugli/storage/local/content/local:iso/${ksisoname} -H 'Authorization: PVEAPIToken=$packer_username=$packer_token'"
+                                }
+                                finally {
+                                    dir('template-ec2') {
+                                        script {
+                                            sh "terraform destroy -auto-approve"
+                                            sh "rm -f ./ssh-key.pem"
+                                        }
+                                    }
+                                }
+                                // Delete the temporary VM
+                                // This is probably at the end and handled after template snapshot.
 //                                sh "curl -k -s -X DELETE https://192.168.137.7:8006/api2/json/nodes/ugli/storage/local/content/local:iso/${ksisoname} -H 'Authorization: PVEAPIToken=$packer_username=$packer_token'"
 //                            }
-                                }
+                            }
 //                            }
                         }
                     }
+                }
 //                    stage('Provision with Ansible Tower') {
 //                        when {
 //                            expression { 'true' == 'true' }
@@ -127,12 +150,28 @@ podTemplate(label: "build",
 //                        when {
 //                            expression { 'true' == 'true' }
 //                        }
-//                        steps {
-//                            script {
-//                                terraform.stopInstance(INSTANCE_ID)
+//                        withCredentials([sshUserPrivateKey(credentialsId: 'cloud_init_vm_prv_key', keyFileVariable: 'cloud_init_vm_prv_key')]) {
+//                            withCredentials([string(credentialsId: 'cloud_init_vm_pub_key', variable: 'cloud_init_vm_pub_key')]) {
+//                                withCredentials([usernamePassword(credentialsId: 'proxmox_token', passwordVariable: 'PM_API_TOKEN_SECRET', usernameVariable: 'PM_API_TOKEN_ID')]) {
+//                                    script {
+//                                        def varMap = [:]
+//                                        varMap["fullscap"] = fullscap
+//                                        varMap["build_number"] = build_number
+//                                        varMap["ssh_public_key"] = "'${cloud_init_vm_pub_key}'"
+//
+//                                        sh "terraform workspace new ${branch} || true"
+//                                        sh "terraform workspace select ${branch}"
+//
+//                                        //def terraformStringBuilder
+//                                        def varString = terraformVarStringBuilder(varMap)
+//
+//
+//                                        sh "terraform refresh"
+//                                        sh "terraform destroy -auto-approve  ${varString}"
+//                                    }
+//                                }
 //                            }
 //                        }
-//                    }
 //
 //                    stage('Snapshot the Instance') {
 //                        when {
@@ -148,11 +187,11 @@ podTemplate(label: "build",
 //                            }
 //                        }
 //                    }
-                }
             }
         }
     }
 }
+
 
 def getOutput(tag) {
     def retVal
@@ -164,7 +203,7 @@ def getOutput(tag) {
     return retVal
 }
 
-def terraformVarStringBuilder(varMap){
+def terraformVarStringBuilder(varMap) {
     def varString = ""
     for (def key in varMap.keySet()) {
         println "key = ${key}, value = ${varMap[key]}"
@@ -172,4 +211,58 @@ def terraformVarStringBuilder(varMap){
     }
     return varString
 }
+
+def localDeploy(playbook, varMap, varFileName, IP_ADDR) {
+
+    sedCommand = "sed -i 's/IP_ADDR/${IP_ADDR}/g' hosts.yaml"
+    sedResult = sh(returnStdout: true, script: "${sedCommand}")
+
+    // Generate ansible vars extra parameters
+    if (varFileName != null) {
+        varsString = ansibleVarStringBuilder(varMap, varFileName)
+    } else {
+        varsString = ansibleVarStringBuilder(varMap)
+    }
+
+    // Pull down dependencies
+    sh "ansible-galaxy install -r ./roles/requirements.yml -p roles/"
+
+    // Call Ansible-playbook
+    sh "ansible-playbook ${varsString} ${playbook}"
+}
+
+//def localDeploy(gitToken, aws_certificate, playbook, varMap, varFileName, repo_url, repo_branch, IP_ADDR, INSTANCE_ENVIRONMENT_TAG){
+//    // Clone repo + branch
+//    dir("repo"){
+//        // Inject token into git repo
+//        authRepo = sh(returnStdout: true, script: "sh -c \"echo -n ${repo_url} | sed 's|https://github|https://${gitToken}@github|g'\"")
+//
+//        // Clone the repo
+//        sh "git clone -b ${repo_branch} ${authRepo} ."
+//
+//        // Call the deployment
+//        localDeploy(gitToken, aws_certificate, playbook, varMap, varFileName, IP_ADDR, INSTANCE_ENVIRONMENT_TAG)
+//    }
+//}
+
+def ansibleVarStringBuilder(varMap, varFileName) {
+    return ansibleVarStringBuilder(varMap) + " -e ${varFileName}"
+}
+
+def ansibleVarStringBuilder(varMap) {
+    def varString = ""
+    for (def key in varMap.keySet()) {
+        println "key = ${key}, value = ${varMap[key]}"
+        varString += " -e ${key}=\"${varMap[key]}\""
+    }
+    return varString
+}
+
+def getPEMjson(certString, certName, fileName) {
+    pemJSON = "{\"${certName}\":\"${certString}\"}"
+    sh "#!/bin/sh -e\necho '${pemJSON}' > ${fileName}"
+    sh "chmod 0600 ${fileName}"
+    return "${fileName}"
+}
+
 

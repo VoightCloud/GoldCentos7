@@ -7,5 +7,5 @@
 
   roles:
   - required_software
-  - register_agents
-  - aide_update
+#  - register_agents
+#  - aide_update
