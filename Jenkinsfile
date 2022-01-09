@@ -172,7 +172,6 @@ podTemplate(label: "build",
 //                            }
 //                        }
 //                    }
-                    }
                 }
             }
         }
