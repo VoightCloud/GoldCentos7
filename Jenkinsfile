@@ -154,9 +154,11 @@ podTemplate(label: "build",
 
 
                                         sh "terraform refresh"
-                                        sh "terraform destroy -auto-approve  ${varString}"                                    }
+                                        sh "terraform destroy -auto-approve  ${varString}"
+                                    }
                                 }
                             }
+                        }
 //
 //                    stage('Snapshot the Instance') {
 //                        when {
@@ -172,28 +174,29 @@ podTemplate(label: "build",
 //                            }
 //                        }
 //                    }
-                        }
                     }
                 }
             }
         }
+    }
+}
 
-        def getOutput(tag) {
-            def retVal
-            retVal = sh(
-                    script: "terraform output ${tag}",
-                    returnStdout: true
-            ).trim()
+def getOutput(tag) {
+    def retVal
+    retVal = sh(
+            script: "terraform output ${tag}",
+            returnStdout: true
+    ).trim()
 
-            return retVal
-        }
+    return retVal
+}
 
-        def terraformVarStringBuilder(varMap) {
-            def varString = ""
-            for (def key in varMap.keySet()) {
-                println "key = ${key}, value = ${varMap[key]}"
-                varString += " -var ${key}=${varMap[key]}"
-            }
-            return varString
-        }
+def terraformVarStringBuilder(varMap) {
+    def varString = ""
+    for (def key in varMap.keySet()) {
+        println "key = ${key}, value = ${varMap[key]}"
+        varString += " -var ${key}=${varMap[key]}"
+    }
+    return varString
+}
 
