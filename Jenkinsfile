@@ -31,13 +31,13 @@ podTemplate(label: "build",
             stage('Build') {
                 withCredentials([sshUserPrivateKey(credentialsId: 'cloud_init_vm_prv_key', keyFileVariable: 'cloud_init_vm_prv_key')]) {
                     withCredentials([sshUserPrivateKey(credentialsId: 'cloud_init_vm_pub_key', keyFileVariable: 'cloud_init_vm_pub_key')]) {
-                    withCredentials([usernamePassword(credentialsId: 'proxmox_token', passwordVariable: 'packer_token', usernameVariable: 'packer_username')]) {
+                        withCredentials([usernamePassword(credentialsId: 'proxmox_token', passwordVariable: 'packer_token', usernameVariable: 'packer_username')]) {
 
-                        container('packer-terraform') {
-                            def scmVars = checkout([$class           : 'GitSCM',
-                                                    userRemoteConfigs: scm.userRemoteConfigs,
-                                                    branches         : scm.branches,
-                                                    extensions       : scm.extensions])
+                            container('packer-terraform') {
+                                def scmVars = checkout([$class           : 'GitSCM',
+                                                        userRemoteConfigs: scm.userRemoteConfigs,
+                                                        branches         : scm.branches,
+                                                        extensions       : scm.extensions])
 
 //                            try {
                                 dir('template-ec2') {
@@ -75,6 +75,7 @@ podTemplate(label: "build",
 //                            }
                                 }
 //                            }
+                            }
                         }
                     }
 //                    stage('Provision with Ansible Tower') {
@@ -166,7 +167,7 @@ def getOutput(tag) {
     return retVal
 }
 
-def terraformVarStringBuilder(varMap){
+def terraformVarStringBuilder(varMap) {
     def varString = ""
     for (def key in varMap.keySet()) {
         println "key = ${key}, value = ${varMap[key]}"
