@@ -76,8 +76,7 @@ data "template_file" "user_data" {
   count    = 1
   template = file("${path.module}/userdata.tmpl")
   vars     = {
-    #pubkey   =  proxmox_vm_qemu.test_server.sshkeys # file("~/.ssh/id_rsa.pub")
-    #    pubkey   =  file("~/.ssh/id_rsa.pub")
+    pubkey   =  var.ssh_public_key # file("~/.ssh/id_rsa.pub")
     hostname = "vm-${count.index}"
     fqdn     = "vm-${count.index}.voight.org"
     dna      = var.template_name
