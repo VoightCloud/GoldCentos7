@@ -46,7 +46,7 @@ podTemplate(label: "build",
                                         def varMap = [:]
                                         varMap["fullscap"] = fullscap
                                         varMap["build_number"] = build_number
-                                        varMap["ssh_public_key"] = cloud_init_vm_pub_key
+                                        varMap["ssh_public_key"] = "'${cloud_init_vm_pub_key}'"
 
                                         sh "terraform --version"
                                         sh "terraform init"
