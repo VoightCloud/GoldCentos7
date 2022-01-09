@@ -72,7 +72,7 @@ podTemplate(label: "build",
                                 def pemJSON = getPEMjson(cloud_init_vm_prv_key, "aws_certificate", "pem.json")
 
                                 def ansibleVarMap = [:]
-                                localDeploy(cloud_init_vm_prv_key, "./playbook.yaml", ansibleVarMap, varFile, IP_ADDR)
+                                localDeploy(cloud_init_vm_prv_key, "./playbook.yaml", ansibleVarMap, pemJSON, IP_ADDR)
 
                                 sh "terraform destroy -auto-approve"
 
