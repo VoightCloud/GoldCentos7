@@ -213,12 +213,6 @@ def terraformVarStringBuilder(varMap) {
 }
 
 def localDeploy(playbook, varMap, varFileName, IP_ADDR) {
-    // Make backup before sed command
-
-//    sh "cp ./roles/requirements.yml ./roles/requirements.yml.bak"
-//    // SED to add git token to requirements
-//    sedCommand = "sed -i 's|https://github|https://${gitToken}@github|g' ./roles/requirements.yml"
-//    sedResult = sh(returnStdout: true, script: "${sedCommand}")
 
     sedCommand = "sed -i 's/IP_ADDR/${IP_ADDR}/g' hosts.yaml"
     sedResult = sh(returnStdout: true, script: "${sedCommand}")
@@ -235,14 +229,6 @@ def localDeploy(playbook, varMap, varFileName, IP_ADDR) {
 
     // Call Ansible-playbook
     sh "ansible-playbook ${varsString} ${playbook}"
-
-    // Remove requirements with embedded git token
-    sh "rm ./roles/requirements.yml"
-
-    sh "rm ./ssh-key.pem"
-
-    // Move backup file back in case somebody needs to troubleshoot the workspace
-    sh "mv ./roles/requirements.yml.bak ./roles/requirements.yml"
 }
 
 //def localDeploy(gitToken, aws_certificate, playbook, varMap, varFileName, repo_url, repo_branch, IP_ADDR, INSTANCE_ENVIRONMENT_TAG){
