@@ -64,7 +64,7 @@ podTemplate(label: "build",
                                         sh "terraform plan -no-color ${varString}"
                                         sh "terraform apply -auto-approve  ${varString}"
 
-                                        IP_ADDR = getOutput("gold-ami_ip | sed s/\\\"//g")
+                                        IP_ADDR = getOutput("ip | sed s/\\\"//g")
 //                                        INSTANCE_ID = getOutput("gold-ami_id")
 //                                        BASE_AMI = getOutput("base_ami")
                                     }
@@ -72,7 +72,7 @@ podTemplate(label: "build",
                                 def pemJSON = getPEMjson(cloud_init_vm_prv_key, "aws_certificate", "pem.json")
 
                                 def ansibleVarMap = [:]
-                                localDeploy(aws_certificate, playbook, ansibleVarMap, varFile, IP_ADDR)
+                                localDeploy(cloud_init_vm_prv_key, playbook, ansibleVarMap, varFile, IP_ADDR)
 
                                 sh "terraform destroy -auto-approve"
 
