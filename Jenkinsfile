@@ -74,11 +74,14 @@ podTemplate(label: "build",
 
                                     def ansibleVarMap = [:]
                                     localDeploy("./playbook.yaml", ansibleVarMap, pemJSON, IP_ADDR)
+                                    sh "scp -i ./ssh-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ec2-admin@${IP_ADDR}:/tmp/*.html ."
+
 
                                     sh "terraform destroy -auto-approve"
 
                                     sh "rm -f ./ssh-key.pem"
 
+                                    archiveArtifacts artifacts: '*.html'
 //                                sh "curl -k -s -X DELETE https://192.168.137.7:8006/api2/json/nodes/ugli/storage/local/content/local:iso/${ksisoname} -H 'Authorization: PVEAPIToken=$packer_username=$packer_token'"
                                 }
                                 finally {
@@ -188,6 +191,7 @@ podTemplate(label: "build",
 //                        }
 //                    }
             }
+
         }
     }
 }
