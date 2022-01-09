@@ -70,13 +70,14 @@ podTemplate(label: "build",
                                         }
                                     }
                                     def pemJSON = getPEMjson(cloud_init_vm_prv_key, "aws_certificate", "pem.json")
+                                    sh "cp ${cloud_init_vm_prv_key} ./ssh-key.pem"
 
                                     def ansibleVarMap = [:]
                                     localDeploy("./playbook.yaml", ansibleVarMap, pemJSON, IP_ADDR)
 
                                     sh "terraform destroy -auto-approve"
 
-                                    sh "rm -f ./ssh-key"
+                                    sh "rm -f ./ssh-key.pem"
 
 //                                sh "curl -k -s -X DELETE https://192.168.137.7:8006/api2/json/nodes/ugli/storage/local/content/local:iso/${ksisoname} -H 'Authorization: PVEAPIToken=$packer_username=$packer_token'"
                                 }
@@ -84,6 +85,7 @@ podTemplate(label: "build",
                                     dir('template-ec2') {
                                         script {
                                             sh "terraform destroy -auto-approve"
+                                            sh "rm -f ./ssh-key.pem"
                                         }
                                     }
                                 }
