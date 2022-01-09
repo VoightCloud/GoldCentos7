@@ -39,7 +39,7 @@ podTemplate(label: "build",
                                                         branches         : scm.branches,
                                                         extensions       : scm.extensions])
 
-//                            try {
+                            try {
                                 dir('template-ec2') {
                                     script {
                                         echo "Build the Environment"
@@ -80,9 +80,15 @@ podTemplate(label: "build",
 
 //                                sh "curl -k -s -X DELETE https://192.168.137.7:8006/api2/json/nodes/ugli/storage/local/content/local:iso/${ksisoname} -H 'Authorization: PVEAPIToken=$packer_username=$packer_token'"
                             }
-//                            } finally {
-//                                // Delete the temporary VM
-//                                // This is probably at the end and handled after template snapshot.
+                             finally {
+                                 dir('template-ec2'){
+                                     script {
+                                         sh "terraform destroy -auto-approve"
+                                     }
+                                 }
+                             }
+                                // Delete the temporary VM
+                                // This is probably at the end and handled after template snapshot.
 //                                sh "curl -k -s -X DELETE https://192.168.137.7:8006/api2/json/nodes/ugli/storage/local/content/local:iso/${ksisoname} -H 'Authorization: PVEAPIToken=$packer_username=$packer_token'"
 //                            }
                         }
