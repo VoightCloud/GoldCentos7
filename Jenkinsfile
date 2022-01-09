@@ -31,7 +31,7 @@ podTemplate(label: "build",
             stage('Build') {
                 withCredentials([sshUserPrivateKey(credentialsId: 'cloud_init_vm_prv_key', keyFileVariable: 'cloud_init_vm_prv_key')]) {
                     withCredentials([string(credentialsId: 'cloud_init_vm_pub_key', variable: 'cloud_init_vm_pub_key')]) {
-                        withCredentials([usernamePassword(credentialsId: 'proxmox_token', passwordVariable: 'packer_token', usernameVariable: 'packer_username')]) {
+                        withCredentials([usernamePassword(credentialsId: 'proxmox_token', passwordVariable: 'PM_API_TOKEN_ID', usernameVariable: 'PM_API_TOKEN_SECRET')]) {
 
                             container('packer-terraform') {
                                 def scmVars = checkout([$class           : 'GitSCM',
