@@ -75,7 +75,7 @@ locals {
 
 /* Null resource that generates a cloud-config file per vm */
 data "template_file" "user_data" {
-  count    = proxmox_vm_qemu.gold_build.count
+  count    = proxmox_vm_qemu.gold_build[count.index].count
   template = file("${path.module}/userdata.tmpl")
   vars     = {
     hostname = "vm-${count.index}"
@@ -86,13 +86,13 @@ data "template_file" "user_data" {
 }
 
 resource "local_file" "cloud_init_user_data_file" {
-  count    = proxmox_vm_qemu.gold_build.count
+  count    = proxmox_vm_qemu.gold_build[count.index].count
   content  = data.template_file.user_data[count.index].rendered
   filename = "${path.module}/user_data_${count.index}.cfg"
 }
 
 resource "null_resource" "cloud_init_config_files" {
-  count = proxmox_vm_qemu.gold_build.count
+  count = proxmox_vm_qemu.gold_build[count.index].count
   connection {
     type        = "ssh"
     user        = "ec2-admin"
