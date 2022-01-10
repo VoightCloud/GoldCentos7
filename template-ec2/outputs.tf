@@ -1,5 +1,6 @@
 output "ip" {
-  value = "192.168.137.201"
+  # value = "192.168.137.201"
+  value = module.gold_build.ipconfig0[ip]
 }
 
 output "vm_id" {
