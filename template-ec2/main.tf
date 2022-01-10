@@ -14,7 +14,7 @@ provider "proxmox" {
   pm_tls_insecure = true
 }
 
-resource "proxmox_vm_qemu" "test_server" {
+resource "proxmox_vm_qemu" "gold_build" {
 
   count       = 1 # just want 1 for now, set to 0 and apply to destroy VM
   name        = "test-vm-${count.index + 1}"
