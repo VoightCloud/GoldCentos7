@@ -20,7 +20,7 @@ def liteReportName
 
 podTemplate(label: "build",
         containers: [containerTemplate(name: 'packer-terraform',
-                image: 'voight/packer-terraform:1.4',
+                image: 'voight/packer-terraform:1.5',
                 alwaysPullImage: false,
                 ttyEnabled: true,
                 privileged: true,
@@ -61,11 +61,11 @@ podTemplate(label: "build",
 
                                             sh "chmod 0600 ./ssh-key.pem"
 
-                                            sh "terraform plan -no-color ${varString}"
-                                            sh "terraform apply -auto-approve  ${varString}"
+                                            //sh "terraform plan -no-color ${varString}"
+                                            sh "TF_IN_AUTOMATION='1' terraform apply -auto-approve  ${varString}"
 
                                             IP_ADDR = getOutput("ip | sed s/\\\"//g")
-//                                        INSTANCE_ID = getOutput("gold-ami_id")
+                                            INSTANCE_ID = getOutput("vm_id")
 //                                        BASE_AMI = getOutput("base_ami")
                                         }
                                     }
@@ -74,17 +74,29 @@ podTemplate(label: "build",
 
                                     def ansibleVarMap = [:]
                                     localDeploy("./playbook.yaml", ansibleVarMap, pemJSON, IP_ADDR)
+                                    sh "scp -i ./ssh-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ec2-admin@${IP_ADDR}:/tmp/*.html ."
 
-                                    sh "terraform destroy -auto-approve"
+
+                                    // Halt the virtual machine
+                                    sh "curl -k -s -X POST https://192.168.137.7:8006/api2/json/nodes/ugli/qemu/$INSTANCE_ID/status/shutdown -H 'Authorization: PVEAPIToken=$PM_API_TOKEN_ID=$PM_API_TOKEN_SECRET'"
+                                    sh "curl -k -s -X POST https://192.168.137.7:8006/api2/json/nodes/ugli/qemu/$INSTANCE_ID/config -H 'Content-Type: application/x-www-form-urlencoded' -d \"description=gold image&name=gold-image&sshkeys=&ipconfig0=\" -H 'Authorization: PVEAPIToken=$PM_API_TOKEN_ID=$PM_API_TOKEN_SECRET'"
+
+                                    // Template clone the virtual machine
+                                    sh "curl -k -s -X POST https://192.168.137.7:8006/api2/json/nodes/ugli/qemu/$INSTANCE_ID/template -H 'Authorization: PVEAPIToken=$PM_API_TOKEN_ID=$PM_API_TOKEN_SECRET'"
+
+
+                                    // Destroy the old machine
+//                                    sh "terraform destroy -auto-approve"
 
                                     sh "rm -f ./ssh-key.pem"
 
+                                    archiveArtifacts artifacts: '*.html'
 //                                sh "curl -k -s -X DELETE https://192.168.137.7:8006/api2/json/nodes/ugli/storage/local/content/local:iso/${ksisoname} -H 'Authorization: PVEAPIToken=$packer_username=$packer_token'"
                                 }
                                 finally {
                                     dir('template-ec2') {
                                         script {
-                                            sh "terraform destroy -auto-approve"
+//                                            sh "terraform destroy -auto-approve"
                                             sh "rm -f ./ssh-key.pem"
                                         }
                                     }
@@ -188,6 +200,7 @@ podTemplate(label: "build",
 //                        }
 //                    }
             }
+
         }
     }
 }

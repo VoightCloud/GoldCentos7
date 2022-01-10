@@ -8,4 +8,5 @@
   roles:
   - required_software
 #  - register_agents
-#  - aide_update
+  - scapscan
+  - aide_update
