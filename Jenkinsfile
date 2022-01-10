@@ -80,11 +80,11 @@ podTemplate(label: "build",
                                     // Halt the virtual machine
                                     sh "curl -k -s -X POST https://192.168.137.7:8006/api2/json/nodes/ugli/qemu/$INSTANCE_ID/status/shutdown -H 'Authorization: PVEAPIToken=$PM_API_TOKEN_ID=$PM_API_TOKEN_SECRET'"
 
-                                    // Snapshot the virtual machine
+                                    // Template clone the virtual machine
                                     sh "curl -k -s -X POST https://192.168.137.7:8006/api2/json/nodes/ugli/qemu/$INSTANCE_ID/clone -H 'Authorization: PVEAPIToken=$PM_API_TOKEN_ID=$PM_API_TOKEN_SECRET'"
 
                                     // Destroy the old machine
-                                    sh "terraform destroy -auto-approve"
+//                                    sh "terraform destroy -auto-approve"
 
                                     sh "rm -f ./ssh-key.pem"
 
@@ -94,7 +94,7 @@ podTemplate(label: "build",
                                 finally {
                                     dir('template-ec2') {
                                         script {
-                                            sh "terraform destroy -auto-approve"
+//                                            sh "terraform destroy -auto-approve"
                                             sh "rm -f ./ssh-key.pem"
                                         }
                                     }
