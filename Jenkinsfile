@@ -78,8 +78,8 @@ podTemplate(label: "build",
 
 
                                     // Halt the virtual machine
-                                    sh "curl -k -s -X POST https://192.168.137.7:8006/api2/json/nodes/ugli/qemu/$INSTANCE_ID/config -H 'Content-Type: application/x-www-form-urlencoded' -d \"description=gold image&name=gold-image&sshkeys=&tags=gold&ipconfig0=\" -H 'Authorization: PVEAPIToken=$PM_API_TOKEN_ID=$PM_API_TOKEN_SECRET'"
                                     sh "curl -k -s -X POST https://192.168.137.7:8006/api2/json/nodes/ugli/qemu/$INSTANCE_ID/status/shutdown -H 'Authorization: PVEAPIToken=$PM_API_TOKEN_ID=$PM_API_TOKEN_SECRET'"
+                                    sh "curl -k -s -X POST https://192.168.137.7:8006/api2/json/nodes/ugli/qemu/$INSTANCE_ID/config -H 'Content-Type: application/x-www-form-urlencoded' -d \"description=gold image&name=gold-image&sshkeys=&ipconfig0=\" -H 'Authorization: PVEAPIToken=$PM_API_TOKEN_ID=$PM_API_TOKEN_SECRET'"
 
                                     // Template clone the virtual machine
                                     sh "curl -k -s -X POST https://192.168.137.7:8006/api2/json/nodes/ugli/qemu/$INSTANCE_ID/template -H 'Authorization: PVEAPIToken=$PM_API_TOKEN_ID=$PM_API_TOKEN_SECRET'"
