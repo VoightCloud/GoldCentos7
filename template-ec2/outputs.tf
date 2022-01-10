@@ -1,6 +1,6 @@
 output "ip" {
   # value = "192.168.137.201"
-  value = module.gold_build.ipconfig0
+  value = proxmox_vm_qemu.gold_build.ipconfig0
 }
 
 output "vm_id" {
