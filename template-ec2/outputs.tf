@@ -4,7 +4,7 @@ output "ip" {
 }
 
 output "vm_id" {
-  value = proxmox_vm_qemu.gold_build[0].vm_id
+  value = proxmox_vm_qemu.gold_build[0].vmid
 }
 #
 #output "hostname" {
