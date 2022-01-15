@@ -8,7 +8,7 @@ variable "proxmox_host" {
 #Most recent AMI to search for
 variable "template_name" {
   description = "The name of the instance to clone"
-  default = "copper-centos7-1640446036"
+  default = "copper-centos7-1642271199"
 }
 
 #OS Disk Size. Minimum size is 48GB.
