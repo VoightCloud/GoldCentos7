@@ -12,6 +12,7 @@ currentBuild.displayName = instanceName
 def fullscap = false
 def IS_MAIN = (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'main' || env.BRANCH_NAME.startsWith('PR-'))
 def build_number = (env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'main' ? env.BUILD_NUMBER.padLeft(3, '0') : env.BUILD_NUMBER.padLeft(3, '0') + UUID.randomUUID().toString()[-3..-1])
+def IMAGE_NAME = "Mercury Image" + build_number
 def INSTANCE_ENVIRONMENT_TAG
 def INSTANCE_IC_PLATFORM_TAG
 def BASE_AMI
@@ -65,7 +66,7 @@ podTemplate(label: "build",
                                             sh "TF_IN_AUTOMATION='1' terraform apply -auto-approve  ${varString}"
 
                                             IP_ADDR = getOutput("ip | sed s/\\\"//g")
-                                            INSTANCE_ID = getOutput("vm_id")
+                                            INSTANCE_ID = getOutput("vmid")
 //                                        BASE_AMI = getOutput("base_ami")
                                         }
                                     }
@@ -79,7 +80,11 @@ podTemplate(label: "build",
 
                                     // Halt the virtual machine
                                     sh "curl -k -s -X POST https://192.168.137.7:8006/api2/json/nodes/ugli/qemu/$INSTANCE_ID/status/shutdown -H 'Authorization: PVEAPIToken=$PM_API_TOKEN_ID=$PM_API_TOKEN_SECRET'"
-                                    sh "curl -k -s -X POST https://192.168.137.7:8006/api2/json/nodes/ugli/qemu/$INSTANCE_ID/config -H 'Content-Type: application/x-www-form-urlencoded' -d \"description=gold image&name=gold-image&sshkeys=&ipconfig0=\" -H 'Authorization: PVEAPIToken=$PM_API_TOKEN_ID=$PM_API_TOKEN_SECRET'"
+                                    if( IS_MAIN == true ){
+                                        IMAGE_NAME = "gold-image"
+                                    }
+
+                                    sh "curl -k -s -X POST https://192.168.137.7:8006/api2/json/nodes/ugli/qemu/$INSTANCE_ID/config -H 'Content-Type: application/x-www-form-urlencoded' -d \"description=$IMAGE_NAME&name=$IMAGE_NAME&sshkeys=&ipconfig0=\" -H 'Authorization: PVEAPIToken=$PM_API_TOKEN_ID=$PM_API_TOKEN_SECRET'"
 
                                     // Template clone the virtual machine
                                     sh "curl -k -s -X POST https://192.168.137.7:8006/api2/json/nodes/ugli/qemu/$INSTANCE_ID/template -H 'Authorization: PVEAPIToken=$PM_API_TOKEN_ID=$PM_API_TOKEN_SECRET'"
