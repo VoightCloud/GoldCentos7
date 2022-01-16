@@ -1,6 +1,6 @@
 - src: git+https://github.com/VoightCloud/Centos7Required.git
   name: required_software
-  version: main
+  version: feature/clamav
   scm: git
 - src: git+https://github.com/VoightCloud/Centos7SCAPScan.git
   name: scapscan
