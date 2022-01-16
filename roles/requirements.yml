@@ -1,10 +1,10 @@
 - src: git+https://github.com/VoightCloud/Centos7Required.git
   name: required_software
-  version: feature/centosstig
+  version: main
   scm: git
 - src: git+https://github.com/VoightCloud/Centos7SCAPScan.git
   name: scapscan
-  version: feature/centosstig
+  version: main
   scm: git
 #- src: git+https://github..com/M-A/register_agents.git
 #  name: register_agents
