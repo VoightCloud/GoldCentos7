@@ -5,6 +5,11 @@ variable "proxmox_host" {
   default = "ugli"
 }
 
+variable "vmid" {
+  description = "what vmid to use for this image"
+  default = "131"
+}
+
 #Most recent AMI to search for
 variable "template_name" {
   description = "The name of the instance to clone"

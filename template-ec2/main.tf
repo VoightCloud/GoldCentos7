@@ -24,6 +24,7 @@ resource "proxmox_vm_qemu" "gold_build" {
   clone       = var.template_name
   full_clone  = false
 
+  vmid        = var.vmid
   # basic VM settings here. agent refers to guest agent
   agent       = 1
   bios        = "ovmf"
