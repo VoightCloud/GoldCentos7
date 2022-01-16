@@ -66,7 +66,7 @@ podTemplate(label: "build",
                                             sh "TF_IN_AUTOMATION='1' terraform apply -auto-approve  ${varString}"
 
                                             IP_ADDR = getOutput("ip | sed s/\\\"//g")
-                                            INSTANCE_ID = getOutput("vm_id")
+                                            INSTANCE_ID = getOutput("vmid")
 //                                        BASE_AMI = getOutput("base_ami")
                                         }
                                     }
