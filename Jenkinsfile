@@ -18,6 +18,8 @@ def INSTANCE_IC_PLATFORM_TAG
 def BASE_AMI
 def reportName
 def liteReportName
+def goldIDNumber = 130
+def VM_ID = ( IS_MAIN ? 130 : 135 )
 
 podTemplate(label: "build",
         containers: [containerTemplate(name: 'packer-terraform',
@@ -45,6 +47,9 @@ podTemplate(label: "build",
                                         script {
                                             echo "Build the Environment"
                                             def varMap = [:]
+                                            varMap["vmid"] = VM_ID
+                                            sh "curl -k -X DELETE https://192.168.137.7:8006/api2/json/nodes/ugli/qemu/${VM_ID} -H 'Authorization: PVEAPIToken=$PM_API_TOKEN_ID=$PM_API_TOKEN_SECRET'"
+
                                             varMap["fullscap"] = fullscap
                                             varMap["build_number"] = build_number
                                             varMap["ssh_public_key"] = "'${cloud_init_vm_pub_key}'"

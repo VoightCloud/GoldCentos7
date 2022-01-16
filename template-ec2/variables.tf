@@ -7,7 +7,7 @@ variable "proxmox_host" {
 
 variable "vmid" {
   description = "what vmid to use for this image"
-  default = "145"
+  default = "185"
 }
 
 #Most recent AMI to search for
