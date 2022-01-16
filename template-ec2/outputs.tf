@@ -1,5 +1,5 @@
 output "ip" {
-  value = "192.168.137." + var.vmid
+  value = "192.168.137.${var.vmid}"
 #  value = proxmox_vm_qemu.gold_build[0].ipconfig0
 }
 
