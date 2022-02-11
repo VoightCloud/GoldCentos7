@@ -13,7 +13,7 @@ variable "vmid" {
 #Most recent AMI to search for
 variable "template_name" {
   description = "The name of the instance to clone"
-  default = "copper-centos7-1642271199"
+  default = "copper-centos7-1643648272"
 }
 
 #OS Disk Size. Minimum size is 48GB.
